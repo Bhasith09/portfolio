@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mohammed Bhasith — AIML Engineer</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;font-family:'Outfit',sans-serif;scroll-behavior:smooth}
+*{box-sizing:border-box}
+:root{--bg:#07080f;--surface:rgba(15,18,35,0.7);--glass:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.07);--neon1:#00d4ff;--neon2:#a855f7;--neon3:#06ffa5;--text:#e2e8f0;--text2:#94a3b8;--accent1:#0ea5e9;--accent2:#8b5cf6}
+
+.app-wrapper{height:100%;width:100%;overflow-y:auto;overflow-x:hidden;background:var(--bg);color:var(--text);scroll-behavior:smooth}
+
+/* Scrollbar */
+.app-wrapper::-webkit-scrollbar{width:6px}
+.app-wrapper::-webkit-scrollbar-track{background:transparent}
+.app-wrapper::-webkit-scrollbar-thumb{background:var(--neon2);border-radius:3px}
+
+/* Canvas */
+#particleCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* Glass */
+.glass{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:16px}
+.glass-sm{background:rgba(255,255,255,0.03);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:12px}
+
+/* Glow */
+.glow-cyan{box-shadow:0 0 30px rgba(0,212,255,0.15),0 0 60px rgba(0,212,255,0.05)}
+.glow-purple{box-shadow:0 0 30px rgba(168,85,247,0.15),0 0 60px rgba(168,85,247,0.05)}
+.glow-green{box-shadow:0 0 30px rgba(6,255,165,0.15)}
+.text-glow-cyan{text-shadow:0 0 20px rgba(0,212,255,0.5)}
+.text-glow-purple{text-shadow:0 0 20px rgba(168,85,247,0.5)}
+
+/* Typing cursor */
+.typing-cursor::after{content:'|';animation:blink .8s infinite;color:var(--neon1)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* Float */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.anim-float{animation:float 4s ease-in-out infinite}
+.anim-float-d1{animation:float 4.5s ease-in-out 0.3s infinite}
+.anim-float-d2{animation:float 5s ease-in-out 0.6s infinite}
+
+/* Rotate */
+@keyframes spin-slow{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.anim-spin-slow{animation:spin-slow 20s linear infinite}
+
+/* Fade in up on scroll */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}
+.reveal-d2{transition-delay:.2s}
+.reveal-d3{transition-delay:.3s}
+.reveal-d4{transition-delay:.4s}
+.reveal-d5{transition-delay:.5s}
+
+/* Skill card */
+.skill-card{transition:all .4s cubic-bezier(.25,.8,.25,1);cursor:pointer}
+.skill-card:hover{transform:translateY(-8px) scale(1.05);border-color:var(--neon1);box-shadow:0 0 40px rgba(0,212,255,0.2),inset 0 0 40px rgba(0,212,255,0.03)}
+.skill-card .skill-icon{transition:all .4s ease}
+.skill-card:hover .skill-icon{transform:scale(1.15);filter:drop-shadow(0 0 12px var(--neon1))}
+
+/* Project card flip */
+.card-3d{perspective:1000px}
+.card-inner{transition:transform .7s cubic-bezier(.25,.8,.25,1);transform-style:preserve-3d;position:relative}
+.card-3d:hover .card-inner{transform:rotateY(180deg)}
+.card-front,.card-back{backface-visibility:hidden;position:absolute;inset:0;border-radius:16px}
+.card-back{transform:rotateY(180deg)}
+
+/* Timeline */
+.timeline-line{width:2px;background:linear-gradient(to bottom,var(--neon1),var(--neon2),var(--neon3))}
+.timeline-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--neon1);background:var(--bg);transition:all .3s}
+.timeline-item:hover .timeline-dot{background:var(--neon1);box-shadow:0 0 20px var(--neon1)}
+
+/* Nav */
+.nav-link{position:relative;transition:color .3s}
+.nav-link::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--neon1),var(--neon2));transition:width .3s}
+.nav-link:hover::after,.nav-link.active::after{width:100%}
+
+/* Btn */
+.btn-primary{background:linear-gradient(135deg,var(--neon1),var(--neon2));padding:12px 28px;border-radius:12px;font-weight:600;transition:all .3s;position:relative;overflow:hidden}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,255,0.3)}
+.btn-outline{border:1px solid var(--neon1);padding:12px 28px;border-radius:12px;font-weight:600;transition:all .3s;color:var(--neon1)}
+.btn-outline:hover{background:rgba(0,212,255,0.1);transform:translateY(-2px)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-content{max-width:560px;width:100%;animation:modalIn .3s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* Contact input */
+.contact-input{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);transition:all .3s;width:100%;outline:none}
+.contact-input:focus{border-color:var(--neon1);box-shadow:0 0 20px rgba(0,212,255,0.1)}
+
+/* Orb */
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15;pointer-events:none}
+
+/* Section */
+.section-pad{padding:100px 24px}
+
+/* Responsive tweaks */
+@media(max-width:768px){
+  .section-pad{padding:60px 16px}
+  .hero-title{font-size:2.2rem!important}
+  .projects-grid{grid-template-columns:1fr!important}
+  .skills-grid{grid-template-columns:repeat(2,1fr)!important}
+}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full">
+  <canvas id="particleCanvas"></canvas>
+  <div class="app-wrapper" id="appWrapper">
+   <nav class="fixed top-0 left-0 right-0 z-50 glass" style="border-radius:0;border-top:none;border-left:none;border-right:none;backdrop-filter:blur(20px)">
+    <div style="max-width:1200px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between">
+     <a href="#hero" class="font-bold text-lg" style="font-family:'JetBrains Mono';color:var(--neon1)">&lt;Hello World/&gt;</a>
+     <div class="hidden md:flex gap-8 text-sm" style="color:var(--text2)">
+      <a href="#hero" class="nav-link" onclick="smoothNav(event,'hero')">Home</a> <a href="#about" class="nav-link" onclick="smoothNav(event,'about')">About</a> <a href="#skills" class="nav-link" onclick="smoothNav(event,'skills')">Skills</a> <a href="#projects" class="nav-link" onclick="smoothNav(event,'projects')">Projects</a> <a href="#journey" class="nav-link" onclick="smoothNav(event,'journey')">Journey</a> <a href="#contact" class="nav-link" onclick="smoothNav(event,'contact')">Contact</a>
+     </div><button id="mobileMenuBtn" class="md:hidden" style="color:var(--text)" onclick="toggleMobile()"><i data-lucide="menu" style="width:24px;height:24px"></i></button>
+    </div>
+    <div id="mobileMenu" class="md:hidden hidden" style="padding:0 24px 16px;display:none">
+     <div class="flex flex-col gap-3 text-sm" style="color:var(--text2)">
+      <a href="#hero" class="nav-link" onclick="smoothNav(event,'hero');toggleMobile()">Home</a> <a href="#about" class="nav-link" onclick="smoothNav(event,'about');toggleMobile()">About</a> <a href="#skills" class="nav-link" onclick="smoothNav(event,'skills');toggleMobile()">Skills</a> <a href="#projects" class="nav-link" onclick="smoothNav(event,'projects');toggleMobile()">Projects</a> <a href="#journey" class="nav-link" onclick="smoothNav(event,'journey');toggleMobile()">Journey</a> <a href="#contact" class="nav-link" onclick="smoothNav(event,'contact');toggleMobile()">Contact</a>
+     </div>
+    </div>
+   </nav><section id="hero" class="section-pad" style="min-height:100%;display:flex;align-items:center;position:relative;overflow:hidden">
+    <div class="orb" style="width:500px;height:500px;background:var(--neon1);top:-100px;left:-100px"></div>
+    <div class="orb" style="width:400px;height:400px;background:var(--neon2);bottom:-100px;right:-100px"></div>
+    <div style="max-width:1200px;margin:0 auto;width:100%;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:40px">
+     <div style="flex:1;min-width:300px">
+      <p class="reveal" style="color:var(--neon1);font-family:'JetBrains Mono';font-size:.9rem;margin-bottom:12px">welcome to my portfolio</p>
+      <h1 id="heroName" class="reveal reveal-d1 hero-title" style="font-size:3.5rem;font-weight:800;line-height:1.1;margin-bottom:16px">Mohammed<br><span style="background:linear-gradient(135deg,var(--neon1),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Bhasith</span></h1>
+      <p id="heroTagline" class="reveal reveal-d2" style="color:var(--text2);font-size:1.1rem;margin-bottom:8px">AI &amp; ML Engineer | Python Developer | Problem Solver</p>
+      <div class="reveal reveal-d3" style="margin-bottom:32px">
+       <span style="color:var(--neon3);font-family:'JetBrains Mono';font-size:.9rem" id="typingText" class="typing-cursor"></span>
+      </div>
+      <div class="reveal reveal-d4 flex flex-wrap gap-4">
+       <a href="#projects" onclick="smoothNav(event,'projects')" class="btn-primary text-white text-sm">View Projects</a> <a href="M_Bhasith_CV.pdf" download="M_Bhasith_CV.pdf" class="btn-outline text-sm inline-flex items-center" onclick="showToast('Downloading Resume...')">
+  <i data-lucide="download" style="width:16px;height:16px;margin-right:6px"></i>
+  View CV
+</a>
+      </div>
+     </div>
+     <div class="reveal reveal-d3" style="flex:0 0 280px;display:flex;align-items:center;justify-content:center">
+      <div class="anim-float" style="position:relative;width:260px;height:260px">
+       <div class="anim-spin-slow" style="position:absolute;inset:0;border:1px dashed rgba(0,212,255,0.2);border-radius:50%"></div>
+       <div class="anim-spin-slow" style="position:absolute;inset:20px;border:1px dashed rgba(168,85,247,0.2);border-radius:50%;animation-direction:reverse;animation-duration:15s"></div>
+       <svg viewbox="0 0 200 200" style="position:absolute;inset:30px;filter:drop-shadow(0 0 30px rgba(0,212,255,0.3))">
+        <defs>
+         <lineargradient id="brainGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#00d4ff" />
+          <stop offset="100%" stop-color="#a855f7" />
+         </lineargradient>
+        </defs> <circle cx="100" cy="100" r="60" fill="none" stroke="url(#brainGrad)" stroke-width="1.5" opacity=".3" /> <circle cx="100" cy="50" r="5" fill="#00d4ff" opacity=".8">
+         <animate attributename="r" values="5;7;5" dur="2s" repeatcount="indefinite" />
+        </circle> <circle cx="60" cy="80" r="4" fill="#a855f7" opacity=".8">
+         <animate attributename="r" values="4;6;4" dur="2.5s" repeatcount="indefinite" />
+        </circle> <circle cx="140" cy="80" r="4" fill="#06ffa5" opacity=".8">
+         <animate attributename="r" values="4;6;4" dur="1.8s" repeatcount="indefinite" />
+        </circle> <circle cx="75" cy="120" r="5" fill="#00d4ff" opacity=".8">
+         <animate attributename="r" values="5;7;5" dur="2.2s" repeatcount="indefinite" />
+        </circle> <circle cx="125" cy="120" r="4" fill="#a855f7" opacity=".8">
+         <animate attributename="r" values="4;6;4" dur="2.8s" repeatcount="indefinite" />
+        </circle> <circle cx="100" cy="150" r="5" fill="#06ffa5" opacity=".8">
+         <animate attributename="r" values="5;7;5" dur="2s" repeatcount="indefinite" />
+        </circle> <circle cx="100" cy="100" r="6" fill="#00d4ff" opacity=".9">
+         <animate attributename="r" values="6;8;6" dur="1.5s" repeatcount="indefinite" />
+        </circle> <line x1="100" y1="50" x2="60" y2="80" stroke="#00d4ff" stroke-width=".8" opacity=".3" /> <line x1="100" y1="50" x2="140" y2="80" stroke="#a855f7" stroke-width=".8" opacity=".3" /> <line x1="100" y1="50" x2="100" y2="100" stroke="#06ffa5" stroke-width=".8" opacity=".3" /> <line x1="60" y1="80" x2="75" y2="120" stroke="#00d4ff" stroke-width=".8" opacity=".3" /> <line x1="60" y1="80" x2="100" y2="100" stroke="#a855f7" stroke-width=".8" opacity=".3" /> <line x1="140" y1="80" x2="125" y2="120" stroke="#06ffa5" stroke-width=".8" opacity=".3" /> <line x1="140" y1="80" x2="100" y2="100" stroke="#00d4ff" stroke-width=".8" opacity=".3" /> <line x1="75" y1="120" x2="100" y2="150" stroke="#a855f7" stroke-width=".8" opacity=".3" /> <line x1="125" y1="120" x2="100" y2="150" stroke="#00d4ff" stroke-width=".8" opacity=".3" /> <line x1="100" y1="100" x2="100" y2="150" stroke="#06ffa5" stroke-width=".8" opacity=".3" /> <line x1="100" y1="100" x2="75" y2="120" stroke="#00d4ff" stroke-width=".8" opacity=".3" /> <line x1="100" y1="100" x2="125" y2="120" stroke="#a855f7" stroke-width=".8" opacity=".3" />
+       </svg>
+      </div>
+     </div>
+    </div>
+   </section><section id="about" class="section-pad" style="position:relative">
+    <div style="max-width:1000px;margin:0 auto">
+     <h2 class="reveal" style="font-size:2rem;font-weight:700;margin-bottom:48px;text-align:center"><span style="color:var(--neon1);font-family:'JetBrains Mono';font-size:.85rem;display:block;margin-bottom:8px">01.</span> About Me</h2>
+     <div class="reveal reveal-d1 glass" style="padding:40px;display:flex;gap:40px;flex-wrap:wrap;align-items:center">
+     <div class="anim-float-d1 glow-cyan" style="flex:0 0 160px;height:160px;border-radius:50%;border:2px solid var(--neon1);margin:0 auto;overflow:hidden;">
+  <img src="profile.png.PNG" alt="Mohammed Bhasith" style="width:100%;height:100%;object-fit:cover;object-position:center;">
+</div>
+      <div style="flex:1;min-width:250px">
+       <p id="aboutBio" style="color:var(--text2);line-height:1.8;margin-bottom:24px">Passionate AIML engineer focused on building intelligent AI systems and solving real-world problems. Experienced in developing end-to-end ML pipelines, developing advanced AI systems using LLMs, Retrieval-Augmented Generation, Generative AI, and Agentic AI.</p>
+      </div>
+     </div>
+    </div>
+   </section><section id="skills" class="section-pad" style="position:relative">
+    <div class="orb" style="width:350px;height:350px;background:var(--neon2);top:50%;left:-100px"></div>
+    <div style="max-width:1000px;margin:0 auto;position:relative;z-index:1">
+     <h2 class="reveal" style="font-size:2rem;font-weight:700;margin-bottom:48px;text-align:center"><span style="color:var(--neon1);font-family:'JetBrains Mono';font-size:.85rem;display:block;margin-bottom:8px">02.</span> Skills &amp; Technologies</h2>
+     <div class="skills-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px" id="skillsGrid">
+     </div>
+    </div>
+   </section><section id="projects" class="section-pad" style="position:relative">
+    <div class="orb" style="width:400px;height:400px;background:var(--neon3);bottom:0;right:-100px"></div>
+    <div style="max-width:1100px;margin:0 auto;position:relative;z-index:1">
+     <h2 class="reveal" style="font-size:2rem;font-weight:700;margin-bottom:48px;text-align:center"><span style="color:var(--neon1);font-family:'JetBrains Mono';font-size:.85rem;display:block;margin-bottom:8px">03.</span> Featured Projects</h2>
+     <div class="projects-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px" id="projectsGrid">
+     </div>
+    </div>
+   </section><section id="journey" class="section-pad" style="position:relative">
+    <div style="max-width:800px;margin:0 auto;position:relative;z-index:1">
+     <h2 class="reveal" style="font-size:2rem;font-weight:700;margin-bottom:48px;text-align:center"><span style="color:var(--neon1);font-family:'JetBrains Mono';font-size:.85rem;display:block;margin-bottom:8px">04.</span> Learning Journey</h2>
+     <div id="timelineContainer" style="position:relative;padding-left:40px">
+      <div class="timeline-line" style="position:absolute;left:6px;top:0;bottom:0"></div>
+     </div>
+    </div>
+   </section><section id="contact" class="section-pad" style="position:relative">
+    <div class="orb" style="width:300px;height:300px;background:var(--neon1);top:0;left:50%;transform:translateX(-50%)"></div>
+    <div style="max-width:600px;margin:0 auto;position:relative;z-index:1">
+     <h2 class="reveal" style="font-size:2rem;font-weight:700;margin-bottom:48px;text-align:center"><span style="color:var(--neon1);font-family:'JetBrains Mono';font-size:.85rem;display:block;margin-bottom:8px">05.</span> Get In Touch</h2>
+     <div class="reveal reveal-d1 glass anim-float-d2" style="padding:40px;text-align:center">
+      <div class="flex justify-center gap-6 mb-8">
+
+
+
+        <a id="contactEmailLink"
+   href="#"
+   onclick="showEmailPopup(event)"
+   class="glass-sm glow-cyan"
+   style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--neon1);transition:all .3s">
+   <i data-lucide="mail" style="width:22px;height:22px"></i> </a> 
+   <a id="contactGithubLink" 
+       href="https://github.com/Bhasith09" target="_blank" rel="noopener noreferrer" class="glass-sm glow-purple" 
+       style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--neon2);
+       transition:all .3s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+        <i data-lucide="github" style="width:22px;height:22px"></i> </a> 
+        
+        <a id="contactLinkedinLink" 
+        href="https://linkedin.com/in/bhasith" target="_blank" rel="noopener noreferrer" class="glass-sm glow-green" 
+        style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;
+        border-radius:50%;color:var(--neon3);transition:all .3s" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"> <i data-lucide="linkedin" style="width:22px;height:22px"></i> </a>
+      </div>
+
+
+      
+      <form action="https://api.web3forms.com/submit" method="POST" class="flex flex-col gap-4 text-left">
+
+  <!-- Web3Forms Key -->
+  <input type="hidden" name="access_key" value="4c8bf2dc-2c3b-4216-9631-0abd4d7196f8">
+
+  <!-- Optional -->
+  <input type="hidden" name="subject" value="New Portfolio Message">
+  <input type="hidden" name="from_name" value="Mohammed Bhasith Portfolio">
+
+  <!-- Inputs -->
+  <input id="cName" name="name" class="contact-input" placeholder="Your Name" required>
+
+  <input id="cEmail" name="email" type="email" class="contact-input" placeholder="Your Email" required>
+
+  <textarea id="cMsg" name="message" class="contact-input" rows="4" placeholder="Your Message" required></textarea>
+
+  <!-- Button -->
+  <button type="submit" class="btn-primary text-white text-sm" style="width:100%">
+    Send Message
+  </button>
+
+</form>
+      <div id="formSuccess" style="display:none;margin-top:16px;color:var(--neon3);font-size:.9rem">
+       ✓ Message sent! I'll get back to you soon.
+      </div>
+     </div>
+    </div>
+   </section><footer style="text-align:center;padding:32px 24px;color:var(--text2);font-size:.8rem;position:relative;z-index:1;border-top:1px solid var(--border)">
+    <p>Designed &amp; Built by <span id="footerName" style="color:var(--neon1)">Mohammed Bhasith</span> © 2026</p>
+   </footer>
+  </div><div class="modal-overlay" id="projectModal">
+   <div class="modal-content glass" style="padding:32px;position:relative" id="modalInner">
+    <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;color:var(--text2);background:none;border:none;cursor:pointer"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+    <h3 id="modalTitle" style="font-size:1.4rem;font-weight:700;margin-bottom:12px;color:var(--neon1)"></h3>
+    <p id="modalDesc" style="color:var(--text2);line-height:1.7;margin-bottom:16px"></p>
+    <div id="modalTech" class="flex flex-wrap gap-2 mb-4"></div>
+    <div id="modalFeatures" style="color:var(--text2);font-size:.9rem"></div>
+   </div>
+  </div><div id="toast" style="position:fixed;bottom:-60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--neon1),var(--neon2));color:#fff;padding:12px 24px;border-radius:12px;font-size:.9rem;z-index:200;transition:bottom .4s ease;font-weight:500"></div>
+  <style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}</style>
+  <script>
+// Data
+const skills = [
+  {name:'Python',icon:'code-2',color:'#00d4ff'},
+  {name:'Machine Learning',icon:'brain',color:'#a855f7'},
+  {name:'Deep Learning',icon:'layers',color:'#06ffa5'},
+  {name:'SQL / PostgreSQL',icon:'database',color:'#a855f7'},
+  {name:'MongoDB',icon:'hard-drive',color:'#a855f7'},
+  {name:'Flask',icon:'globe',color:'#06ffa5'},
+  {name:'FastAPI',icon:'zap',color:'#a855f7'},
+  {name:'NLP',icon:'text',color:'#06ffa5'},
+  {name:'LLM & RAG',icon:'message-circle',color:'#00d4ff'},
+  {name:'Agentic AI',icon:'bot',color:'#a855f7'},
+  {name:'MLOps',icon:'settings',color:'#00d4ff'},
+  {name:'Git / GitHub',icon:'git-branch',color:'#06ffa5'},
+  {name:'Docker',icon:'box',color:'#00d4ff'}
+];
+
+const projects = [
+  {title:'Personalized Resume Analyzer & Recruiter Toolkit',desc:'Developed an AI-powered resume analysis and job matching system leveraging LLMs for contextual understanding, enabling intelligent extraction of skills and experience and matching candidates to jobs using semantic similarity.',tech:['Python','Streamlit','LLM','Groq API'],features:['Resume Strength & Weakness Analysis','ATS score & Optimization tips','Job match analysis based on GD provided','Canditate summary for recruiter','Resume comparision for recruiter','A Cover letter generator'],gradient:'var(--neon1)'},
+  {title:'AI Data Analyst',desc:'My Personalized AI data Analyst is an interactive tool that allows users to upload a csv file and instantly recieve automated data analysis, visualization & AI generated insights',tech:['Python','Matplotlib','Seaborn','Streamlit','LLM','Groq API'],features:['Data visualization','Data analysis','AI-generated insights','Q&A with the uploaded csv file'],gradient:'var(--neon2)'},
+  {title:'Facial Classification using Machine Learning',desc:'Image classification using openCV and Machine Learning model like SVM and Integrating with Wavelet transform to get the accurate image classification result',tech:['Python','OpenCV','Discrete Wavelet Transform','Support Vector Machine', 'Flask'],features:['Image preprocessing','Feature extraction','Real-time classification','Flask deployment'],gradient:'var(--neon3)'},
+  {title:'Flashcard Generator',desc:'AI-powered flashcard generator using OpenAI API and Flask to create study materials from any topic.',tech:['Python','OpenAI API','Flask','JavaScript'],features:['AI content generation','Spaced repetition','Custom topics','Export functionality'],gradient:'var(--neon1)'},
+  {title:'Brain Tumor Detection',desc:'Deep learning model for detecting brain tumors from MRI scans using CNN architecture.',tech:['Python','TensorFlow','CNN','Flask'],features:['MRI image analysis','High accuracy detection','Grad-CAM visualization','Medical reporting'],gradient:'var(--neon2)'}
+];
+
+const timeline = [
+  {year:'2025 - Present',title:'Advanced AI & Agentic AI Systems',desc:'Exploring LLMs, RAG architectures, and Agentic AI frameworks',color:'var(--neon1)'},
+  {year:'2024',title:'Deep Learning & Natural Language Processing',desc:'Mastered CNNs, ANNs, and built image classification systems',color:'var(--neon2)'},
+  {year:'2023',title:'Machine Learning & MLOps Concepts',desc:'Built end-to-end ML pipelines with deployment workflows',color:'var(--neon3)'},
+  {year:'2022',title:'Data Engineering & SQL',desc:'Advanced SQL, PostgreSQL, MongoDB for data management',color:'var(--neon1)'},
+  {year:'2021',title:'Python & Machine Learning Foundation',desc:'Started journey with Python, Pandas, NumPy, and data analysis',color:'var(--neon2)'}
+];
+
+// Render skills
+function renderSkills(){
+  const g=document.getElementById('skillsGrid');
+  g.innerHTML=skills.map((s,i)=>`
+    <div class="skill-card glass-sm reveal reveal-d${Math.min(i%4+1,5)}" style="padding:24px;text-align:center">
+      <div class="skill-icon" style="margin-bottom:12px;color:${s.color}"><i data-lucide="${s.icon}" style="width:32px;height:32px;margin:0 auto"></i></div>
+      <p style="font-weight:600;font-size:.9rem">${s.name}</p>
+    </div>
+  `).join('');
+}
+
+// Render projects
+function renderProjects(){
+  const g=document.getElementById('projectsGrid');
+  g.innerHTML=projects.map((p,i)=>`
+    <div class="card-3d reveal reveal-d${Math.min(i%4+1,5)}" style="height:280px">
+      <div class="card-inner" style="width:100%;height:100%">
+        <div class="card-front glass" style="padding:28px;display:flex;flex-direction:column;justify-content:space-between">
+          <div>
+            <div style="width:40px;height:3px;background:${p.gradient};border-radius:2px;margin-bottom:16px"></div>
+            <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:10px">${p.title}</h3>
+            <p style="color:var(--text2);font-size:.85rem;line-height:1.6">${p.desc.substring(0,90)}...</p>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-3">
+            ${p.tech.slice(0,3).map(t=>`<span style="font-size:.7rem;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.05);color:var(--text2)">${t}</span>`).join('')}
+          </div>
+        </div>
+        <div class="card-back glass" style="padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+          <p style="color:var(--text2);font-size:.85rem;margin-bottom:20px">Hover to explore</p>
+          <button class="btn-primary text-white text-sm" onclick="openModal(${i})" style="padding:10px 24px">View Details</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Render timeline
+function renderTimeline(){
+  const c=document.getElementById('timelineContainer');
+  const line=c.querySelector('.timeline-line');
+  timeline.forEach((t,i)=>{
+    const el=document.createElement('div');
+    el.className=`timeline-item reveal reveal-d${Math.min(i+1,5)}`;
+    el.style.cssText='margin-bottom:40px;position:relative;';
+    el.innerHTML=`
+      <div class="timeline-dot" style="position:absolute;left:-40px;top:6px;border-color:${t.color}"></div>
+      <span style="font-family:'JetBrains Mono';font-size:.8rem;color:${t.color}">${t.year}</span>
+      <h3 style="font-size:1.1rem;font-weight:600;margin:6px 0">${t.title}</h3>
+      <p style="color:var(--text2);font-size:.85rem">${t.desc}</p>
+    `;
+    c.appendChild(el);
+  });
+}
+
+// Modal
+function openModal(i){
+  const p=projects[i];
+  document.getElementById('modalTitle').textContent=p.title;
+  document.getElementById('modalDesc').textContent=p.desc;
+  document.getElementById('modalTech').innerHTML=p.tech.map(t=>`<span style="font-size:.75rem;padding:4px 12px;border-radius:8px;border:1px solid var(--border);color:var(--neon1)">${t}</span>`).join('');
+  document.getElementById('modalFeatures').innerHTML='<p style="font-weight:600;margin-bottom:8px;color:var(--text)">Key Features:</p><ul style="list-style:none;padding:0">'+p.features.map(f=>`<li style="padding:4px 0">✦ ${f}</li>`).join('')+'</ul>';
+  document.getElementById('projectModal').classList.add('open');
+}
+function closeModal(){document.getElementById('projectModal').classList.remove('open')}
+document.getElementById('projectModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+
+
+// Toast
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.bottom='32px';
+  setTimeout(()=>t.style.bottom='-60px',2500);
+}
+function showEmailPopup(e){
+  e.preventDefault();
+
+  const email = "bhasith009@gmail.com";
+
+  navigator.clipboard.writeText(email);
+
+  showToast("📧 Email copied! Contact me at: " + email);
+  
+}
+// Smooth nav
+function smoothNav(e,id){
+  e.preventDefault();
+  document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
+
+// Mobile menu
+function toggleMobile(){
+  const m=document.getElementById('mobileMenu');
+  m.style.display=m.style.display==='none'?'block':'none';
+}
+
+// Typing effect
+const typingWords=['Python Developer','ML Engineer','Deep Learning','Natural Language Processing','LLM & RAG','Agentic AI'];
+let twi=0,tci=0,deleting=false;
+function typeEffect(){
+  const el=document.getElementById('typingText');
+  if(!el)return;
+  const word=typingWords[twi];
+  if(!deleting){
+    el.textContent=word.substring(0,tci+1);tci++;
+    if(tci===word.length){deleting=true;setTimeout(typeEffect,1500);return}
+  }else{
+    el.textContent=word.substring(0,tci-1);tci--;
+    if(tci===0){deleting=false;twi=(twi+1)%typingWords.length}
+  }
+  setTimeout(typeEffect,deleting?40:80);
+}
+
+// Scroll reveal
+function checkReveal(){
+  const wrapper=document.getElementById('appWrapper');
+  const els=document.querySelectorAll('.reveal');
+  els.forEach(el=>{
+    const rect=el.getBoundingClientRect();
+    if(rect.top<window.innerHeight*0.88)el.classList.add('visible');
+  });
+}
+
+// Particles
+function initParticles(){
+  const c=document.getElementById('particleCanvas');
+  const ctx=c.getContext('2d');
+  let w,h;
+  function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  const particles=Array.from({length:60},()=>({
+    x:Math.random()*w,y:Math.random()*h,
+    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+    r:Math.random()*2+1,
+    color:['rgba(0,212,255,','rgba(168,85,247,','rgba(6,255,165,'][Math.floor(Math.random()*3)]
+  }));
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    particles.forEach((p,i)=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>w)p.vx*=-1;
+      if(p.y<0||p.y>h)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.color+'0.4)';ctx.fill();
+      // Connect nearby
+      for(let j=i+1;j<particles.length;j++){
+        const dx=p.x-particles[j].x,dy=p.y-particles[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle=p.color+(0.08*(1-d/120))+')';ctx.lineWidth=.5;ctx.stroke();
+        }
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// Configuration
+const defaultConfig={
+  hero_name:'MOHAMMED BHASITH',
+  hero_tagline:'AI & ML Engineer | Python Developer | Problem Solver',
+  about_bio:'Passionate AIML engineer focused on building intelligent AI systems and solving real-world problems. Experienced in developing end-to-end ML pipelines, developing advanced AI systems using LLMs, Retrieval-Augmented Generation, Generative AI, and Agentic AI.',
+  contact_email:'bhasith009@gmail.com',
+  contact_github:'https://github.com/Bhasith09',
+  contact_linkedin:'https://www.linkedin.com/in/bhasith',
+  background_color:'#07080f',
+  surface_color:'rgba(255,255,255,0.04)',
+  text_color:'#e2e8f0',
+  primary_action_color:'#00d4ff',
+  secondary_action_color:'#a855f7',
+  font_family:'Outfit',
+  font_size:16
+};
+
+// Apply Configuration
+function applyConfig(config){
+  const c=k=>config[k]||defaultConfig[k];
+
+  // Text content
+  const nameEl=document.getElementById('heroName');
+  const nameParts=c('hero_name').split(' ');
+  if(nameParts.length>1){
+    nameEl.innerHTML=nameParts[0]+'<br><span style="background:linear-gradient(135deg,'+c('primary_action_color')+','+c('secondary_action_color')+');-webkit-background-clip:text;-webkit-text-fill-color:transparent">'+nameParts.slice(1).join(' ')+'</span>';
+  } else {
+    nameEl.innerHTML='<span style="background:linear-gradient(135deg,'+c('primary_action_color')+','+c('secondary_action_color')+');-webkit-background-clip:text;-webkit-text-fill-color:transparent">'+c('hero_name')+'</span>';
+  }
+
+  document.getElementById('heroTagline').textContent=c('hero_tagline');
+  document.getElementById('aboutBio').textContent=c('about_bio');
+  document.getElementById('footerName').textContent=c('hero_name');
+
+  // Contact links
+  document.getElementById('contactEmailLink').href='mailto:'+c('contact_email');
+  document.getElementById('contactGithubLink').href=c('contact_github');
+  document.getElementById('contactLinkedinLink').href=c('contact_linkedin');
+
+  // Colors
+  document.documentElement.style.setProperty('--bg',c('background_color'));
+  document.documentElement.style.setProperty('--glass',c('surface_color'));
+  document.documentElement.style.setProperty('--text',c('text_color'));
+  document.documentElement.style.setProperty('--neon1',c('primary_action_color'));
+  document.documentElement.style.setProperty('--neon2',c('secondary_action_color'));
+
+  // Font
+  const font=c('font_family');
+  document.body.style.fontFamily=`${font}, Outfit, sans-serif`;
+
+  // Font size
+  const sz=c('font_size');
+  document.querySelectorAll('.hero-title').forEach(e=>e.style.fontSize=`${sz*2.2}px`);
+  document.querySelectorAll('h2').forEach(e=>e.style.fontSize=`${sz*1.5}px`);
+  document.querySelectorAll('p').forEach(e=>{if(!e.closest('.btn-primary'))e.style.fontSize=`${sz}px`});
+}
+
+// Init everything
+applyConfig(defaultConfig);
+renderSkills();
+renderProjects();
+renderTimeline();
+initParticles();
+typeEffect();
+lucide.createIcons();
+
+// Re-init icons after render
+setTimeout(()=>lucide.createIcons(),100);
+
+const wrapper=document.getElementById('appWrapper');
+wrapper.addEventListener('scroll',checkReveal);
+checkReveal();
+</script>
+</body>
+</html>
